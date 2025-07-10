@@ -12,15 +12,16 @@ const BookmarkGrid = ({ bookmarks, collectionId, spaceId, isPublic = false }) =>
     <DragDropContext onDragEnd={handleDragEnd}>
       <Droppable droppableId={`collection-${collectionId}`} direction="horizontal">
         {(provided) => (
-          <div 
-            className="bookmark-grid"
+          <div
+            className="bookmark-grid p-4"
             ref={provided.innerRef}
             {...provided.droppableProps}
+            style={{ position: 'relative', zIndex: 1 }}
           >
             {bookmarks.map((bookmark, index) => (
-              <Draggable 
-                key={bookmark.id} 
-                draggableId={bookmark.id} 
+              <Draggable
+                key={bookmark.id}
+                draggableId={bookmark.id}
                 index={index}
                 isDragDisabled={isPublic}
               >
@@ -33,6 +34,7 @@ const BookmarkGrid = ({ bookmarks, collectionId, spaceId, isPublic = false }) =>
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.05 }}
                     className={snapshot.isDragging ? 'dragging' : ''}
+                    style={{ position: 'relative', zIndex: snapshot.isDragging ? 50 : 1 }}
                   >
                     <BookmarkItem
                       bookmark={bookmark}

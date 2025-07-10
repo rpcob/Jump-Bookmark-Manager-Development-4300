@@ -2,16 +2,18 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../../contexts/ThemeContext';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../../common/SafeIcon';
 
-const { FiUser, FiSettings, FiLogOut, FiDownload, FiUpload } = FiIcons;
+const { FiUser, FiSettings, FiLogOut, FiSun, FiMoon } = FiIcons;
 
 const UserMenu = ({ user }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const { isDark, toggleTheme } = useTheme();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -19,7 +21,6 @@ const UserMenu = ({ user }) => {
         setIsOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -29,11 +30,28 @@ const UserMenu = ({ user }) => {
     navigate('/login');
   };
 
+  const handleSettingsClick = () => {
+    navigate('/settings');
+    setIsOpen(false);
+  };
+
   const menuItems = [
-    { icon: FiSettings, label: 'Settings', onClick: () => console.log('Settings') },
-    { icon: FiDownload, label: 'Export Data', onClick: () => console.log('Export') },
-    { icon: FiUpload, label: 'Import Data', onClick: () => console.log('Import') },
-    { icon: FiLogOut, label: 'Sign Out', onClick: handleLogout },
+    {
+      icon: isDark ? FiSun : FiMoon,
+      label: isDark ? 'Light Mode' : 'Dark Mode',
+      onClick: toggleTheme
+    },
+    {
+      icon: FiSettings,
+      label: 'Settings',
+      onClick: handleSettingsClick
+    },
+    {
+      icon: FiLogOut,
+      label: 'Sign Out',
+      onClick: handleLogout,
+      className: 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
+    },
   ];
 
   return (
@@ -66,6 +84,7 @@ const UserMenu = ({ user }) => {
                 {user?.email}
               </p>
             </div>
+
             {menuItems.map((item, index) => (
               <button
                 key={index}
@@ -73,7 +92,7 @@ const UserMenu = ({ user }) => {
                   item.onClick();
                   setIsOpen(false);
                 }}
-                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className={`w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${item.className || ''}`}
               >
                 <SafeIcon icon={item.icon} className="w-4 h-4 mr-3" />
                 {item.label}

@@ -14,12 +14,14 @@ export const ThemeProvider = ({ children }) => {
   const [isDark, setIsDark] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState('');
   const [transparentCollections, setTransparentCollections] = useState(false);
+  const [iconSize, setIconSize] = useState('medium');
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('jump_theme');
     const savedBackground = localStorage.getItem('jump_background');
     const savedTransparent = localStorage.getItem('jump_transparent');
-    
+    const savedIconSize = localStorage.getItem('jump_icon_size');
+
     if (savedTheme) {
       setIsDark(savedTheme === 'dark');
     }
@@ -28,6 +30,9 @@ export const ThemeProvider = ({ children }) => {
     }
     if (savedTransparent) {
       setTransparentCollections(savedTransparent === 'true');
+    }
+    if (savedIconSize) {
+      setIconSize(savedIconSize);
     }
   }, []);
 
@@ -48,6 +53,10 @@ export const ThemeProvider = ({ children }) => {
     localStorage.setItem('jump_transparent', transparentCollections.toString());
   }, [transparentCollections]);
 
+  useEffect(() => {
+    localStorage.setItem('jump_icon_size', iconSize);
+  }, [iconSize]);
+
   const toggleTheme = () => {
     setIsDark(!isDark);
   };
@@ -59,6 +68,8 @@ export const ThemeProvider = ({ children }) => {
     setBackgroundImage,
     transparentCollections,
     setTransparentCollections,
+    iconSize,
+    setIconSize,
   };
 
   return (

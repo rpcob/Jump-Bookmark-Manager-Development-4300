@@ -8,6 +8,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import Dashboard from './pages/Dashboard';
+import SettingsPage from './pages/SettingsPage';
 import PublicView from './pages/PublicView';
 import './App.css';
 
@@ -23,16 +24,24 @@ function App() {
                 <Route path="/signup" element={<SignupPage />} />
                 <Route path="/public/:shareId" element={<PublicView />} />
                 <Route 
-                  path="/dashboard" 
+                  path="/settings/*" 
+                  element={
+                    <ProtectedRoute>
+                      <SettingsPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route
+                  path="/dashboard"
                   element={
                     <ProtectedRoute>
                       <Dashboard />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
               </Routes>
-              <Toaster 
+              <Toaster
                 position="top-right"
                 toastOptions={{
                   duration: 3000,

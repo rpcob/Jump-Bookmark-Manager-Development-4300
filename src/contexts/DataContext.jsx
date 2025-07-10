@@ -105,11 +105,10 @@ export const DataProvider = ({ children }) => {
       viewMode: 'grid',
       createdAt: new Date().toISOString(),
     };
-
     const newSpaces = spaces.map(space => 
-      space.id === spaceId 
-        ? { ...space, collections: [...space.collections, newCollection] }
-        : space
+      space.id === spaceId ? 
+        { ...space, collections: [...space.collections, newCollection] } : 
+        space
     );
     setSpaces(newSpaces);
     saveData(newSpaces, currentSpace);
@@ -118,14 +117,26 @@ export const DataProvider = ({ children }) => {
 
   const updateCollection = (spaceId, collectionId, updates) => {
     const newSpaces = spaces.map(space => 
-      space.id === spaceId 
-        ? {
-            ...space,
-            collections: space.collections.map(collection =>
-              collection.id === collectionId ? { ...collection, ...updates } : collection
-            )
-          }
-        : space
+      space.id === spaceId ? 
+        { 
+          ...space, 
+          collections: space.collections.map(collection => 
+            collection.id === collectionId ? 
+              { ...collection, ...updates } : 
+              collection
+          ) 
+        } : 
+        space
+    );
+    setSpaces(newSpaces);
+    saveData(newSpaces, currentSpace);
+  };
+
+  const updateCollectionOrder = (spaceId, reorderedCollections) => {
+    const newSpaces = spaces.map(space => 
+      space.id === spaceId ? 
+        { ...space, collections: reorderedCollections } : 
+        space
     );
     setSpaces(newSpaces);
     saveData(newSpaces, currentSpace);
@@ -133,12 +144,14 @@ export const DataProvider = ({ children }) => {
 
   const deleteCollection = (spaceId, collectionId) => {
     const newSpaces = spaces.map(space => 
-      space.id === spaceId 
-        ? {
-            ...space,
-            collections: space.collections.filter(collection => collection.id !== collectionId)
-          }
-        : space
+      space.id === spaceId ? 
+        { 
+          ...space, 
+          collections: space.collections.filter(collection => 
+            collection.id !== collectionId
+          ) 
+        } : 
+        space
     );
     setSpaces(newSpaces);
     saveData(newSpaces, currentSpace);
@@ -150,18 +163,20 @@ export const DataProvider = ({ children }) => {
       ...bookmarkData,
       createdAt: new Date().toISOString(),
     };
-
     const newSpaces = spaces.map(space => 
-      space.id === spaceId 
-        ? {
-            ...space,
-            collections: space.collections.map(collection =>
-              collection.id === collectionId 
-                ? { ...collection, bookmarks: [...collection.bookmarks, newBookmark] }
-                : collection
-            )
-          }
-        : space
+      space.id === spaceId ? 
+        { 
+          ...space, 
+          collections: space.collections.map(collection => 
+            collection.id === collectionId ? 
+              { 
+                ...collection, 
+                bookmarks: [...collection.bookmarks, newBookmark] 
+              } : 
+              collection
+          ) 
+        } : 
+        space
     );
     setSpaces(newSpaces);
     saveData(newSpaces, currentSpace);
@@ -170,21 +185,23 @@ export const DataProvider = ({ children }) => {
 
   const updateBookmark = (spaceId, collectionId, bookmarkId, updates) => {
     const newSpaces = spaces.map(space => 
-      space.id === spaceId 
-        ? {
-            ...space,
-            collections: space.collections.map(collection =>
-              collection.id === collectionId 
-                ? {
-                    ...collection,
-                    bookmarks: collection.bookmarks.map(bookmark =>
-                      bookmark.id === bookmarkId ? { ...bookmark, ...updates } : bookmark
-                    )
-                  }
-                : collection
-            )
-          }
-        : space
+      space.id === spaceId ? 
+        { 
+          ...space, 
+          collections: space.collections.map(collection => 
+            collection.id === collectionId ? 
+              { 
+                ...collection, 
+                bookmarks: collection.bookmarks.map(bookmark => 
+                  bookmark.id === bookmarkId ? 
+                    { ...bookmark, ...updates } : 
+                    bookmark
+                ) 
+              } : 
+              collection
+          ) 
+        } : 
+        space
     );
     setSpaces(newSpaces);
     saveData(newSpaces, currentSpace);
@@ -192,19 +209,21 @@ export const DataProvider = ({ children }) => {
 
   const deleteBookmark = (spaceId, collectionId, bookmarkId) => {
     const newSpaces = spaces.map(space => 
-      space.id === spaceId 
-        ? {
-            ...space,
-            collections: space.collections.map(collection =>
-              collection.id === collectionId 
-                ? {
-                    ...collection,
-                    bookmarks: collection.bookmarks.filter(bookmark => bookmark.id !== bookmarkId)
-                  }
-                : collection
-            )
-          }
-        : space
+      space.id === spaceId ? 
+        { 
+          ...space, 
+          collections: space.collections.map(collection => 
+            collection.id === collectionId ? 
+              { 
+                ...collection, 
+                bookmarks: collection.bookmarks.filter(bookmark => 
+                  bookmark.id !== bookmarkId
+                ) 
+              } : 
+              collection
+          ) 
+        } : 
+        space
     );
     setSpaces(newSpaces);
     saveData(newSpaces, currentSpace);
@@ -212,6 +231,28 @@ export const DataProvider = ({ children }) => {
 
   const getCurrentSpace = () => {
     return spaces.find(space => space.id === currentSpace);
+  };
+
+  const exportData = () => {
+    return { spaces };
+  };
+
+  const importData = async (data) => {
+    if (data && data.spaces && Array.isArray(data.spaces)) {
+      setSpaces(data.spaces);
+      const newCurrentSpace = data.spaces.length > 0 ? data.spaces[0].id : null;
+      setCurrentSpace(newCurrentSpace);
+      saveData(data.spaces, newCurrentSpace);
+    } else {
+      throw new Error('Invalid data format');
+    }
+  };
+
+  const clearAllData = async () => {
+    setSpaces([]);
+    setCurrentSpace(null);
+    saveData([], null);
+    initializeDefaultData();
   };
 
   const value = {
@@ -227,11 +268,15 @@ export const DataProvider = ({ children }) => {
     deleteSpace,
     createCollection,
     updateCollection,
+    updateCollectionOrder,
     deleteCollection,
     createBookmark,
     updateBookmark,
     deleteBookmark,
     getCurrentSpace,
+    exportData,
+    importData,
+    clearAllData,
   };
 
   return (

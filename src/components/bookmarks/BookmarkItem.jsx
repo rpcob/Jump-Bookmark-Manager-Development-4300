@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useData } from '../../contexts/DataContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import EditBookmarkModal from './EditBookmarkModal';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../../common/SafeIcon';
@@ -11,6 +12,7 @@ const BookmarkItem = ({ bookmark, collectionId, spaceId, viewMode, isPublic = fa
   const [showMenu, setShowMenu] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const { deleteBookmark } = useData();
+  const { iconSize } = useTheme();
 
   const handleDelete = () => {
     if (window.confirm('Are you sure you want to delete this bookmark?')) {
@@ -28,7 +30,6 @@ const BookmarkItem = ({ bookmark, collectionId, spaceId, viewMode, isPublic = fa
   const getFaviconUrl = (url) => {
     if (bookmark.favicon) return bookmark.favicon;
     if (!url) return null;
-    
     try {
       const domain = new URL(url).hostname;
       return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
@@ -38,6 +39,16 @@ const BookmarkItem = ({ bookmark, collectionId, spaceId, viewMode, isPublic = fa
   };
 
   const faviconUrl = getFaviconUrl(bookmark.url);
+
+  // Icon size configurations
+  const iconSizes = {
+    small: { container: 'w-8 h-8', icon: 'w-4 h-4' },
+    medium: { container: 'w-10 h-10', icon: 'w-5 h-5' },
+    large: { container: 'w-12 h-12', icon: 'w-6 h-6' },
+    xl: { container: 'w-14 h-14', icon: 'w-7 h-7' },
+  };
+
+  const currentIconSize = iconSizes[iconSize] || iconSizes.medium;
 
   if (viewMode === 'grid') {
     return (
@@ -49,22 +60,26 @@ const BookmarkItem = ({ bookmark, collectionId, spaceId, viewMode, isPublic = fa
         >
           <div
             onClick={handleClick}
-            className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            className={`${currentIconSize.container} bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors`}
+            title={bookmark.title || bookmark.url}
           >
             {faviconUrl ? (
               <img
                 src={faviconUrl}
                 alt={bookmark.title}
-                className="w-6 h-6 rounded"
+                className={`${currentIconSize.icon} rounded`}
                 onError={(e) => {
                   e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
                 }}
               />
-            ) : (
-              <SafeIcon icon={FiExternalLink} className="w-5 h-5 text-gray-500" />
-            )}
+            ) : null}
+            <SafeIcon
+              icon={FiExternalLink}
+              className={`${currentIconSize.icon} text-gray-500 ${faviconUrl ? 'hidden' : 'flex'}`}
+            />
           </div>
-          
+
           {!isPublic && (
             <div className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <div className="relative">
@@ -77,9 +92,8 @@ const BookmarkItem = ({ bookmark, collectionId, spaceId, viewMode, isPublic = fa
                 >
                   <SafeIcon icon={FiMoreHorizontal} className="w-3 h-3 text-gray-500" />
                 </button>
-                
                 {showMenu && (
-                  <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
+                  <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-[60]">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -136,13 +150,16 @@ const BookmarkItem = ({ bookmark, collectionId, spaceId, viewMode, isPublic = fa
               className="w-5 h-5 rounded"
               onError={(e) => {
                 e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
               }}
             />
-          ) : (
-            <SafeIcon icon={FiExternalLink} className="w-4 h-4 text-gray-500" />
-          )}
+          ) : null}
+          <SafeIcon
+            icon={FiExternalLink}
+            className={`w-4 h-4 text-gray-500 ${faviconUrl ? 'hidden' : 'flex'}`}
+          />
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
             {bookmark.title}
@@ -151,9 +168,9 @@ const BookmarkItem = ({ bookmark, collectionId, spaceId, viewMode, isPublic = fa
             {bookmark.description || bookmark.url}
           </p>
         </div>
-        
+
         {bookmark.tags && bookmark.tags.length > 0 && (
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 hidden sm:block">
             <div className="flex flex-wrap gap-1">
               {bookmark.tags.slice(0, 2).map((tag, index) => (
                 <span
@@ -171,7 +188,7 @@ const BookmarkItem = ({ bookmark, collectionId, spaceId, viewMode, isPublic = fa
             </div>
           </div>
         )}
-        
+
         {!isPublic && (
           <div className="opacity-0 group-hover:opacity-100 transition-opacity">
             <div className="relative">
@@ -184,9 +201,8 @@ const BookmarkItem = ({ bookmark, collectionId, spaceId, viewMode, isPublic = fa
               >
                 <SafeIcon icon={FiMoreHorizontal} className="w-4 h-4 text-gray-500" />
               </button>
-              
               {showMenu && (
-                <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
+                <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-[60]">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();

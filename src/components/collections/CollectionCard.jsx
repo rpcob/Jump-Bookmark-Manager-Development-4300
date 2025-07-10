@@ -6,12 +6,7 @@ import BookmarkList from '../bookmarks/BookmarkList';
 import CollectionHeader from './CollectionHeader';
 import AddBookmarkModal from '../bookmarks/AddBookmarkModal';
 
-const CollectionCard = ({ 
-  collection, 
-  spaceId, 
-  transparentBackground = false,
-  isPublic = false 
-}) => {
+const CollectionCard = ({ collection, spaceId, transparentBackground = false, isPublic = false }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const { updateCollection } = useData();
 
@@ -30,9 +25,9 @@ const CollectionCard = ({
   };
 
   const cardClasses = `
-    rounded-lg border transition-all duration-200 hover:shadow-lg
-    ${transparentBackground 
-      ? 'bg-white/70 dark:bg-gray-800/70 border-white/20 dark:border-gray-700/20 backdrop-blur-sm' 
+    rounded-lg border transition-all duration-200 hover:shadow-lg relative
+    ${transparentBackground
+      ? 'bg-white/70 dark:bg-gray-800/70 border-white/20 dark:border-gray-700/20 backdrop-blur-sm'
       : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
     }
   `;
@@ -44,6 +39,7 @@ const CollectionCard = ({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.2 }}
+      style={{ position: 'relative', zIndex: 1 }}
     >
       <CollectionHeader
         collection={collection}
@@ -62,6 +58,7 @@ const CollectionCard = ({
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
+            style={{ position: 'relative', zIndex: 1 }}
           >
             {collection.bookmarks.length > 0 ? (
               collection.viewMode === 'grid' ? (

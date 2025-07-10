@@ -11,10 +11,11 @@ const {
   FiGrid, 
   FiList, 
   FiPlus, 
-  FiMoreHorizontal,
-  FiEdit2,
-  FiTrash2,
-  FiShare2
+  FiMoreHorizontal, 
+  FiEdit2, 
+  FiTrash2, 
+  FiShare2,
+  FiMenu
 } = FiIcons;
 
 const CollectionHeader = ({ 
@@ -22,7 +23,7 @@ const CollectionHeader = ({
   spaceId, 
   onToggleCollapse, 
   onViewModeChange, 
-  onAddBookmark,
+  onAddBookmark, 
   isPublic = false 
 }) => {
   const [showMenu, setShowMenu] = useState(false);
@@ -46,8 +47,8 @@ const CollectionHeader = ({
 
   return (
     <>
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center space-x-3">
+      <div className="flex flex-wrap items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center space-x-3 mb-2 sm:mb-0">
           {!isPublic && (
             <button
               onClick={onToggleCollapse}
@@ -59,18 +60,14 @@ const CollectionHeader = ({
               />
             </button>
           )}
-          
           <div className="flex items-center space-x-2">
-            {collection.icon && (
-              <span className="text-lg">{collection.icon}</span>
-            )}
-            <h3 className="font-semibold text-gray-900 dark:text-white">
+            {collection.icon && <span className="text-lg">{collection.icon}</span>}
+            <h3 className="font-semibold text-gray-900 dark:text-white truncate max-w-[200px] sm:max-w-none">
               {collection.name}
             </h3>
           </div>
-          
           {collection.description && (
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-gray-600 dark:text-gray-400 hidden sm:block">
               {collection.description}
             </p>
           )}
@@ -101,14 +98,12 @@ const CollectionHeader = ({
                   <SafeIcon icon={FiList} className="w-4 h-4" />
                 </button>
               </div>
-
               <button
                 onClick={onAddBookmark}
                 className="p-2 text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
               >
                 <SafeIcon icon={FiPlus} className="w-4 h-4" />
               </button>
-
               <div className="relative">
                 <button
                   onClick={() => setShowMenu(!showMenu)}
@@ -116,7 +111,6 @@ const CollectionHeader = ({
                 >
                   <SafeIcon icon={FiMoreHorizontal} className="w-4 h-4" />
                 </button>
-
                 {showMenu && (
                   <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
                     <button
@@ -150,6 +144,12 @@ const CollectionHeader = ({
           )}
         </div>
       </div>
+
+      {collection.description && (
+        <p className="text-sm text-gray-600 dark:text-gray-400 px-4 py-2 sm:hidden">
+          {collection.description}
+        </p>
+      )}
 
       {!isPublic && (
         <EditCollectionModal
