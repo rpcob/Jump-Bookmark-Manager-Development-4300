@@ -23,7 +23,6 @@ const UserMenu = ({ user }) => {
         setIsOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -39,8 +38,11 @@ const UserMenu = ({ user }) => {
   };
 
   const handlePublicCollectionsClick = () => {
-    navigate('/public');
-    setIsOpen(false);
+    // Navigate to the user's public profile using their username
+    if (user?.username) {
+      navigate(`/u/${user.username}`);
+      setIsOpen(false);
+    }
   };
 
   const menuItems = [
@@ -58,7 +60,7 @@ const UserMenu = ({ user }) => {
     },
     {
       icon: FiGlobe,
-      label: 'Public Collections',
+      label: 'Public Profile',
       onClick: handlePublicCollectionsClick
     },
     {
@@ -71,7 +73,7 @@ const UserMenu = ({ user }) => {
       label: 'Sign Out',
       onClick: handleLogout,
       className: 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
-    },
+    }
   ];
 
   return (
@@ -119,7 +121,9 @@ const UserMenu = ({ user }) => {
                   item.onClick();
                   setIsOpen(false);
                 }}
-                className={`w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${item.className || ''}`}
+                className={`w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                  item.className || ''
+                }`}
               >
                 <SafeIcon icon={item.icon} className="w-4 h-4 mr-3" />
                 <span className="flex-1 text-left">{item.label}</span>

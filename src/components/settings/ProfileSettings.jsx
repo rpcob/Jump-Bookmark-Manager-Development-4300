@@ -9,6 +9,7 @@ const ProfileSettings = () => {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
+    username: user?.username || '',
     newPassword: '',
   });
   const [loading, setLoading] = useState(false);
@@ -17,7 +18,7 @@ const ProfileSettings = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -28,6 +29,7 @@ const ProfileSettings = () => {
       await updateProfile({
         name: formData.name,
         email: formData.email,
+        // Note: username is not included as it's not updatable
       });
       toast.success('Profile updated successfully');
     } catch (error) {
@@ -43,7 +45,6 @@ const ProfileSettings = () => {
       toast.error('Please enter a new password');
       return;
     }
-    
     if (formData.newPassword.length < 6) {
       toast.error('Password must be at least 6 characters');
       return;
@@ -51,7 +52,7 @@ const ProfileSettings = () => {
 
     setLoading(true);
     try {
-      // Implement password change logic
+      // Implement password change logic here
       toast.success('Password updated successfully');
       setFormData((prev) => ({
         ...prev,
@@ -67,7 +68,9 @@ const ProfileSettings = () => {
   return (
     <div className="p-6 space-y-8">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Profile Settings</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Profile Settings
+        </h2>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           Manage your account settings and preferences
         </p>
@@ -76,7 +79,10 @@ const ProfileSettings = () => {
       <div className="space-y-6">
         {/* Profile Information */}
         <form onSubmit={handleProfileUpdate} className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Profile Information</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+            Profile Information
+          </h3>
+          
           <div className="grid grid-cols-2 gap-4">
             <Input
               label="Name"
@@ -85,6 +91,7 @@ const ProfileSettings = () => {
               onChange={handleChange}
               placeholder="Your name"
             />
+            
             <Input
               label="Email"
               name="email"
@@ -94,6 +101,17 @@ const ProfileSettings = () => {
               placeholder="Your email"
             />
           </div>
+
+          {/* Username (read-only) */}
+          <Input
+            label="Username"
+            name="username"
+            value={formData.username}
+            readOnly
+            helperText="Usernames cannot be changed after account creation"
+            className="bg-gray-50 dark:bg-gray-700/50"
+          />
+
           <div className="flex justify-end">
             <Button type="submit" loading={loading}>
               Update Profile
@@ -103,7 +121,10 @@ const ProfileSettings = () => {
 
         {/* Password Change */}
         <form onSubmit={handlePasswordChange} className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Change Password</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+            Change Password
+          </h3>
+          
           <Input
             label="New Password"
             name="newPassword"
@@ -112,6 +133,7 @@ const ProfileSettings = () => {
             onChange={handleChange}
             placeholder="Enter new password"
           />
+          
           <div className="flex justify-end">
             <Button
               type="submit"

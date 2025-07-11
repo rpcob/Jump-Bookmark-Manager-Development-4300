@@ -15,41 +15,35 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const validateForm = () => {
     const newErrors = {};
-    
     if (!email) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = 'Email is invalid';
     }
-    
     if (!password) {
       newErrors.password = 'Password is required';
-    } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
     }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
-    
     setLoading(true);
+    
     try {
       await login(email, password);
       toast.success('Welcome back!');
       navigate('/dashboard');
     } catch (error) {
-      toast.error('Invalid credentials');
+      console.error('Login error:', error);
+      toast.error(error.message || 'Invalid credentials');
     } finally {
       setLoading(false);
     }
@@ -84,7 +78,6 @@ const LoginPage = () => {
               error={errors.email}
               placeholder="Enter your email"
             />
-
             <Input
               label="Password"
               type="password"
@@ -107,8 +100,8 @@ const LoginPage = () => {
 
           <p className="text-center text-gray-600 dark:text-gray-400 mt-6">
             Don't have an account?{' '}
-            <Link 
-              to="/signup" 
+            <Link
+              to="/signup"
               className="text-primary-500 hover:text-primary-600 font-medium"
             >
               Sign up

@@ -12,6 +12,7 @@ import Dashboard from './pages/Dashboard';
 import SettingsPage from './pages/SettingsPage';
 import PublicView from './pages/PublicView';
 import PublicCollectionsPage from './pages/PublicCollectionsPage';
+import UserPublicPage from './pages/UserPublicPage';
 import './App.css';
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
                 <Routes>
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/signup" element={<SignupPage />} />
+                  <Route path="/u/:username" element={<UserPublicPage />} />
                   <Route path="/public/:collectionId" element={<PublicView />} />
                   <Route
                     path="/public"
