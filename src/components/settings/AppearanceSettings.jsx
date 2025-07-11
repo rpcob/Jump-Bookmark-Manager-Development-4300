@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useData } from '../../contexts/DataContext';
 import Button from '../ui/Button';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../../common/SafeIcon';
+import toast from 'react-hot-toast';
 
 const { FiSun, FiMoon, FiImage, FiEyeOff } = FiIcons;
 
@@ -10,27 +12,51 @@ const AppearanceSettings = () => {
   const {
     isDark,
     toggleTheme,
-    backgroundImage,
-    setBackgroundImage,
     transparentCollections,
     setTransparentCollections,
     iconSize,
     setIconSize,
   } = useTheme();
 
+  const { 
+    getCurrentSpace, 
+    updateSpace, 
+    spaces, 
+    currentSpace 
+  } = useData();
+  
+  const space = getCurrentSpace();
+  const [backgroundPreview, setBackgroundPreview] = useState(space?.backgroundImage || '');
+
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast.error('Image too large. Maximum size is 5MB');
+        return;
+      }
+      
       const reader = new FileReader();
       reader.onloadend = () => {
-        setBackgroundImage(reader.result);
+        setBackgroundPreview(reader.result);
       };
       reader.readAsDataURL(file);
     }
   };
 
+  const saveBackgroundImage = () => {
+    if (space) {
+      updateSpace(currentSpace, { backgroundImage: backgroundPreview });
+      toast.success('Background image updated');
+    }
+  };
+
   const removeBackground = () => {
-    setBackgroundImage('');
+    setBackgroundPreview('');
+    if (space) {
+      updateSpace(currentSpace, { backgroundImage: '' });
+      toast.success('Background image removed');
+    }
   };
 
   const iconSizes = [
@@ -100,20 +126,26 @@ const AppearanceSettings = () => {
                   <div className="flex items-center space-x-2">
                     <div
                       className={`bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center ${
-                        size.value === 'small' ? 'w-6 h-6' :
-                        size.value === 'medium' ? 'w-8 h-8' :
-                        size.value === 'large' ? 'w-10 h-10' :
-                        'w-12 h-12'
+                        size.value === 'small'
+                          ? 'w-6 h-6'
+                          : size.value === 'medium'
+                          ? 'w-8 h-8'
+                          : size.value === 'large'
+                          ? 'w-10 h-10'
+                          : 'w-12 h-12'
                       }`}
                     >
-                      <SafeIcon 
-                        icon={FiImage} 
+                      <SafeIcon
+                        icon={FiImage}
                         className={`text-gray-500 ${
-                          size.value === 'small' ? 'w-3 h-3' :
-                          size.value === 'medium' ? 'w-4 h-4' :
-                          size.value === 'large' ? 'w-5 h-5' :
-                          'w-6 h-6'
-                        }`} 
+                          size.value === 'small'
+                            ? 'w-3 h-3'
+                            : size.value === 'medium'
+                            ? 'w-4 h-4'
+                            : size.value === 'large'
+                            ? 'w-5 h-5'
+                            : 'w-6 h-6'
+                        }`}
                       />
                     </div>
                     {iconSize === size.value && (
@@ -134,7 +166,7 @@ const AppearanceSettings = () => {
         {/* Background Image */}
         <div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-            Background Image
+            Space Background Image
           </h3>
           <div className="space-y-4">
             <div className="flex items-center space-x-4">
@@ -153,22 +185,52 @@ const AppearanceSettings = () => {
               <Button
                 variant="secondary"
                 onClick={removeBackground}
-                disabled={!backgroundImage}
+                disabled={!backgroundPreview}
                 className="flex-1"
               >
                 <SafeIcon icon={FiEyeOff} className="w-5 h-5 mr-2" />
                 Remove Background
               </Button>
             </div>
-            {backgroundImage && (
-              <div className="relative aspect-video rounded-lg overflow-hidden">
-                <img
-                  src={backgroundImage}
-                  alt="Background Preview"
-                  className="w-full h-full object-cover"
-                />
+            {backgroundPreview && (
+              <div className="space-y-4">
+                <div className="relative aspect-video rounded-lg overflow-hidden">
+                  <img
+                    src={backgroundPreview}
+                    alt="Background Preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <Button onClick={saveBackgroundImage}>
+                    Save Background
+                  </Button>
+                </div>
               </div>
             )}
+            
+            <div className="mt-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                Each space can have its own background image. Select a space from the dashboard to change its background.
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {spaces.map(space => (
+                  <div 
+                    key={space.id}
+                    className={`p-2 border rounded-lg text-sm ${
+                      space.id === currentSpace 
+                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' 
+                        : 'border-gray-200 dark:border-gray-700'
+                    }`}
+                  >
+                    <div className="font-medium">{space.name}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {space.backgroundImage ? 'Has custom background' : 'No background set'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 

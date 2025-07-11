@@ -9,11 +9,11 @@ import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const Dashboard = () => {
   const { getCurrentSpace, loading } = useData();
-  const { backgroundImage, transparentCollections, isDark } = useTheme();
+  const { transparentCollections, isDark } = useTheme();
   const [showCreateModal, setShowCreateModal] = useState(false);
-
+  
   const currentSpace = getCurrentSpace();
-
+  
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -22,16 +22,22 @@ const Dashboard = () => {
     );
   }
 
-  const backgroundStyle = backgroundImage ? {
-    backgroundImage: `url(${backgroundImage})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-  } : {};
-
-  const overlayStyle = backgroundImage ? {
-    backgroundColor: isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.3)',
-  } : {};
+  const backgroundImage = currentSpace?.backgroundImage || '';
+  
+  const backgroundStyle = backgroundImage
+    ? {
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }
+    : {};
+    
+  const overlayStyle = backgroundImage
+    ? {
+        backgroundColor: isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.3)',
+      }
+    : {};
 
   return (
     <div className="min-h-screen" style={backgroundStyle}>
@@ -45,9 +51,9 @@ const Dashboard = () => {
             className="space-y-6"
           >
             {currentSpace && currentSpace.collections.length > 0 ? (
-              <CollectionGrid 
+              <CollectionGrid
                 collections={currentSpace.collections}
-                transparentCollections={transparentCollections}
+                transparentCollections={transparentCollections && !!backgroundImage}
               />
             ) : (
               <div className="text-center py-20">
@@ -69,7 +75,7 @@ const Dashboard = () => {
             )}
           </motion.div>
         </main>
-
+        
         <CreateCollectionModal
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}

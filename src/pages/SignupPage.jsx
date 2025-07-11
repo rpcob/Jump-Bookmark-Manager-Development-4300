@@ -15,37 +15,26 @@ const SignupPage = () => {
     name: '',
     email: '',
     password: '',
-    confirmPassword: '',
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  
   const { signup } = useAuth();
   const navigate = useNavigate();
 
   const validateForm = () => {
     const newErrors = {};
-    
     if (!formData.name) {
       newErrors.name = 'Name is required';
     }
-    
     if (!formData.email) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email is invalid';
     }
-    
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
-    }
-    
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
     }
     
     setErrors(newErrors);
@@ -54,9 +43,8 @@ const SignupPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
-    
+
     setLoading(true);
     try {
       await signup(formData.email, formData.password, formData.name);
@@ -105,7 +93,6 @@ const SignupPage = () => {
               error={errors.name}
               placeholder="Enter your name"
             />
-
             <Input
               label="Email"
               type="email"
@@ -115,7 +102,6 @@ const SignupPage = () => {
               error={errors.email}
               placeholder="Enter your email"
             />
-
             <Input
               label="Password"
               type="password"
@@ -126,33 +112,14 @@ const SignupPage = () => {
               placeholder="Create a password"
             />
 
-            <Input
-              label="Confirm Password"
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              error={errors.confirmPassword}
-              placeholder="Confirm your password"
-            />
-
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              className="w-full"
-              loading={loading}
-            >
+            <Button type="submit" variant="primary" size="lg" className="w-full" loading={loading}>
               Create Account
             </Button>
           </form>
 
           <p className="text-center text-gray-600 dark:text-gray-400 mt-6">
             Already have an account?{' '}
-            <Link 
-              to="/login" 
-              className="text-primary-500 hover:text-primary-600 font-medium"
-            >
+            <Link to="/login" className="text-primary-500 hover:text-primary-600 font-medium">
               Sign in
             </Link>
           </p>

@@ -10,6 +10,7 @@ import SignupPage from './pages/SignupPage';
 import Dashboard from './pages/Dashboard';
 import SettingsPage from './pages/SettingsPage';
 import PublicView from './pages/PublicView';
+import PublicCollectionsPage from './pages/PublicCollectionsPage';
 import './App.css';
 
 function App() {
@@ -22,7 +23,15 @@ function App() {
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
-                <Route path="/public/:shareId" element={<PublicView />} />
+                <Route path="/public/:collectionId" element={<PublicView />} />
+                <Route 
+                  path="/public" 
+                  element={
+                    <ProtectedRoute>
+                      <PublicCollectionsPage />
+                    </ProtectedRoute>
+                  } 
+                />
                 <Route 
                   path="/settings/*" 
                   element={
@@ -31,22 +40,22 @@ function App() {
                     </ProtectedRoute>
                   } 
                 />
-                <Route
-                  path="/dashboard"
+                <Route 
+                  path="/dashboard" 
                   element={
                     <ProtectedRoute>
                       <Dashboard />
                     </ProtectedRoute>
-                  }
+                  } 
                 />
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
               </Routes>
-              <Toaster
-                position="top-right"
+              <Toaster 
+                position="top-right" 
                 toastOptions={{
                   duration: 3000,
                   className: 'dark:bg-gray-800 dark:text-white',
-                }}
+                }} 
               />
             </div>
           </Router>

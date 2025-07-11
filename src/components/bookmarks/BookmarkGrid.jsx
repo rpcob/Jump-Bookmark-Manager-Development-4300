@@ -13,10 +13,10 @@ const BookmarkGrid = ({ bookmarks, collectionId, spaceId, isPublic = false }) =>
       <Droppable droppableId={`collection-${collectionId}`} direction="horizontal">
         {(provided) => (
           <div
-            className="bookmark-grid p-4"
+            className="bookmark-grid p-4 bookmark-container"
             ref={provided.innerRef}
             {...provided.droppableProps}
-            style={{ position: 'relative', zIndex: 1 }}
+            style={{ position: 'relative', zIndex: 1, overflow: 'visible' }}
           >
             {bookmarks.map((bookmark, index) => (
               <Draggable
@@ -34,7 +34,11 @@ const BookmarkGrid = ({ bookmarks, collectionId, spaceId, isPublic = false }) =>
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.05 }}
                     className={snapshot.isDragging ? 'dragging' : ''}
-                    style={{ position: 'relative', zIndex: snapshot.isDragging ? 50 : 1 }}
+                    style={{ 
+                      position: 'relative', 
+                      zIndex: snapshot.isDragging ? 50 : 1,
+                      overflow: 'visible'
+                    }}
                   >
                     <BookmarkItem
                       bookmark={bookmark}

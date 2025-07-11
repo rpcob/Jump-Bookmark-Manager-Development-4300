@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import { useData } from '../../contexts/DataContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import EditBookmarkModal from './EditBookmarkModal';
@@ -11,13 +12,49 @@ const { FiMoreHorizontal, FiEdit2, FiTrash2, FiExternalLink } = FiIcons;
 const BookmarkItem = ({ bookmark, collectionId, spaceId, viewMode, isPublic = false }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+  const menuButtonRef = useRef(null);
+  const menuRef = useRef(null);
   const { deleteBookmark } = useData();
   const { iconSize } = useTheme();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target) && 
+          menuButtonRef.current && !menuButtonRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showMenu]);
+
+  const handleMenuToggle = (e) => {
+    e.stopPropagation();
+    
+    if (!showMenu && menuButtonRef.current) {
+      const rect = menuButtonRef.current.getBoundingClientRect();
+      setMenuPosition({
+        top: rect.bottom + window.scrollY + 4,
+        left: rect.right + window.scrollX - 128, // 128px is menu width (w-32)
+      });
+    }
+    
+    setShowMenu(!showMenu);
+  };
 
   const handleDelete = () => {
     if (window.confirm('Are you sure you want to delete this bookmark?')) {
       deleteBookmark(spaceId, collectionId, bookmark.id);
     }
+    setShowMenu(false);
+  };
+
+  const handleEdit = () => {
+    setShowEditModal(true);
     setShowMenu(false);
   };
 
@@ -49,6 +86,38 @@ const BookmarkItem = ({ bookmark, collectionId, spaceId, viewMode, isPublic = fa
   };
 
   const currentIconSize = iconSizes[iconSize] || iconSizes.medium;
+
+  // Menu component that renders in portal
+  const MenuPortal = () => {
+    if (!showMenu) return null;
+
+    return createPortal(
+      <div
+        ref={menuRef}
+        className="fixed w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-[9999]"
+        style={{
+          top: `${menuPosition.top}px`,
+          left: `${menuPosition.left}px`,
+        }}
+      >
+        <button
+          onClick={handleEdit}
+          className="w-full flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+        >
+          <SafeIcon icon={FiEdit2} className="w-4 h-4 mr-2" />
+          Edit
+        </button>
+        <button
+          onClick={handleDelete}
+          className="w-full flex items-center px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+        >
+          <SafeIcon icon={FiTrash2} className="w-4 h-4 mr-2" />
+          Delete
+        </button>
+      </div>,
+      document.body
+    );
+  };
 
   if (viewMode === 'grid') {
     return (
@@ -82,46 +151,19 @@ const BookmarkItem = ({ bookmark, collectionId, spaceId, viewMode, isPublic = fa
 
           {!isPublic && (
             <div className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="relative">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowMenu(!showMenu);
-                  }}
-                  className="p-1 bg-white dark:bg-gray-800 rounded-full shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <SafeIcon icon={FiMoreHorizontal} className="w-3 h-3 text-gray-500" />
-                </button>
-                {showMenu && (
-                  <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-[60]">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowEditModal(true);
-                        setShowMenu(false);
-                      }}
-                      className="w-full flex items-center px-3 py-1 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      <SafeIcon icon={FiEdit2} className="w-3 h-3 mr-2" />
-                      Edit
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete();
-                      }}
-                      className="w-full flex items-center px-3 py-1 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                    >
-                      <SafeIcon icon={FiTrash2} className="w-3 h-3 mr-2" />
-                      Delete
-                    </button>
-                  </div>
-                )}
-              </div>
+              <button
+                ref={menuButtonRef}
+                onClick={handleMenuToggle}
+                className="p-1 bg-white dark:bg-gray-800 rounded-full shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                <SafeIcon icon={FiMoreHorizontal} className="w-3 h-3 text-gray-500" />
+              </button>
             </div>
           )}
         </motion.div>
 
+        {!isPublic && <MenuPortal />}
+        
         {!isPublic && (
           <EditBookmarkModal
             isOpen={showEditModal}
@@ -191,45 +233,18 @@ const BookmarkItem = ({ bookmark, collectionId, spaceId, viewMode, isPublic = fa
 
         {!isPublic && (
           <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="relative">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowMenu(!showMenu);
-                }}
-                className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
-              >
-                <SafeIcon icon={FiMoreHorizontal} className="w-4 h-4 text-gray-500" />
-              </button>
-              {showMenu && (
-                <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-[60]">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowEditModal(true);
-                      setShowMenu(false);
-                    }}
-                    className="w-full flex items-center px-3 py-1 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                  >
-                    <SafeIcon icon={FiEdit2} className="w-3 h-3 mr-2" />
-                    Edit
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete();
-                    }}
-                    className="w-full flex items-center px-3 py-1 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                  >
-                    <SafeIcon icon={FiTrash2} className="w-3 h-3 mr-2" />
-                    Delete
-                  </button>
-                </div>
-              )}
-            </div>
+            <button
+              ref={menuButtonRef}
+              onClick={handleMenuToggle}
+              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+            >
+              <SafeIcon icon={FiMoreHorizontal} className="w-4 h-4 text-gray-500" />
+            </button>
           </div>
         )}
       </motion.div>
+
+      {!isPublic && <MenuPortal />}
 
       {!isPublic && (
         <EditBookmarkModal

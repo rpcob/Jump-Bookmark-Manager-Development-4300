@@ -18,14 +18,8 @@ const CollectionCard = ({ collection, spaceId, transparentBackground = false, is
     }
   };
 
-  const handleViewModeChange = (viewMode) => {
-    if (!isPublic) {
-      updateCollection(spaceId, collection.id, { viewMode });
-    }
-  };
-
   const cardClasses = `
-    rounded-lg border transition-all duration-200 hover:shadow-lg relative
+    rounded-lg border transition-all duration-200 hover:shadow-lg relative collection-card
     ${transparentBackground
       ? 'bg-white/70 dark:bg-gray-800/70 border-white/20 dark:border-gray-700/20 backdrop-blur-sm'
       : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
@@ -39,13 +33,12 @@ const CollectionCard = ({ collection, spaceId, transparentBackground = false, is
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.2 }}
-      style={{ position: 'relative', zIndex: 1 }}
+      style={{ position: 'relative', zIndex: 1, overflow: 'visible' }}
     >
       <CollectionHeader
         collection={collection}
         spaceId={spaceId}
         onToggleCollapse={handleToggleCollapse}
-        onViewModeChange={handleViewModeChange}
         onAddBookmark={() => setShowAddModal(true)}
         isPublic={isPublic}
       />
@@ -57,7 +50,7 @@ const CollectionCard = ({ collection, spaceId, transparentBackground = false, is
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="overflow-hidden"
+            className="overflow-visible"
             style={{ position: 'relative', zIndex: 1 }}
           >
             {collection.bookmarks.length > 0 ? (

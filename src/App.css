@@ -67,20 +67,24 @@
   margin-bottom: 1rem;
 }
 
-/* Z-index management for nested elements */
+/* Z-index management - ensure collection containers don't interfere */
 .collection-card {
   position: relative;
   z-index: 1;
+  /* Remove overflow hidden to allow menus to show */
+  overflow: visible;
 }
 
 .bookmark-item {
   position: relative;
   z-index: 2;
+  /* Remove overflow hidden to allow menus to show */
+  overflow: visible;
 }
 
-.bookmark-menu {
-  position: absolute;
-  z-index: 60;
+/* Portal menus will use z-index 9999 and render in document.body */
+.portal-menu {
+  z-index: 9999;
 }
 
 /* Fix for bookmark icon hover issue */
@@ -92,7 +96,17 @@
   opacity: 1;
 }
 
-/* Ensure menus appear above other elements */
-.dropdown-menu {
-  z-index: 60;
+/* Ensure smooth transitions for menu visibility */
+.menu-button {
+  transition: opacity 0.2s ease;
+}
+
+/* Collection containers should not clip overflow */
+.collection-container {
+  overflow: visible;
+}
+
+/* Bookmark containers should not clip overflow */
+.bookmark-container {
+  overflow: visible;
 }

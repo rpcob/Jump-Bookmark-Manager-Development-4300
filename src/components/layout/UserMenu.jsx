@@ -6,7 +6,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../../common/SafeIcon';
 
-const { FiUser, FiSettings, FiLogOut, FiSun, FiMoon } = FiIcons;
+const { FiUser, FiSettings, FiLogOut, FiSun, FiMoon, FiGlobe } = FiIcons;
 
 const UserMenu = ({ user }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,6 +21,7 @@ const UserMenu = ({ user }) => {
         setIsOpen(false);
       }
     };
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -35,11 +36,21 @@ const UserMenu = ({ user }) => {
     setIsOpen(false);
   };
 
+  const handlePublicCollectionsClick = () => {
+    navigate('/public');
+    setIsOpen(false);
+  };
+
   const menuItems = [
     {
       icon: isDark ? FiSun : FiMoon,
       label: isDark ? 'Light Mode' : 'Dark Mode',
       onClick: toggleTheme
+    },
+    {
+      icon: FiGlobe,
+      label: 'Public Collections',
+      onClick: handlePublicCollectionsClick
     },
     {
       icon: FiSettings,

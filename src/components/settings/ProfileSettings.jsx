@@ -9,21 +9,21 @@ const ProfileSettings = () => {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    currentPassword: '',
     newPassword: '',
-    confirmPassword: '',
   });
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       await updateProfile({
         name: formData.name,
@@ -39,8 +39,13 @@ const ProfileSettings = () => {
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
-    if (formData.newPassword !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
+    if (!formData.newPassword) {
+      toast.error('Please enter a new password');
+      return;
+    }
+    
+    if (formData.newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters');
       return;
     }
 
@@ -50,9 +55,7 @@ const ProfileSettings = () => {
       toast.success('Password updated successfully');
       setFormData((prev) => ({
         ...prev,
-        currentPassword: '',
         newPassword: '',
-        confirmPassword: '',
       }));
     } catch (error) {
       toast.error('Failed to update password');
@@ -102,36 +105,18 @@ const ProfileSettings = () => {
         <form onSubmit={handlePasswordChange} className="space-y-4">
           <h3 className="text-lg font-medium text-gray-900 dark:text-white">Change Password</h3>
           <Input
-            label="Current Password"
-            name="currentPassword"
+            label="New Password"
+            name="newPassword"
             type="password"
-            value={formData.currentPassword}
+            value={formData.newPassword}
             onChange={handleChange}
-            placeholder="Enter current password"
+            placeholder="Enter new password"
           />
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="New Password"
-              name="newPassword"
-              type="password"
-              value={formData.newPassword}
-              onChange={handleChange}
-              placeholder="Enter new password"
-            />
-            <Input
-              label="Confirm New Password"
-              name="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm new password"
-            />
-          </div>
           <div className="flex justify-end">
             <Button
               type="submit"
               loading={loading}
-              disabled={!formData.currentPassword || !formData.newPassword || !formData.confirmPassword}
+              disabled={!formData.newPassword}
             >
               Change Password
             </Button>
