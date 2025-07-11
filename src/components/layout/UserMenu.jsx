@@ -3,10 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useEditMode } from '../../contexts/EditModeContext';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../../common/SafeIcon';
 
-const { FiUser, FiSettings, FiLogOut, FiSun, FiMoon, FiGlobe } = FiIcons;
+const { FiUser, FiSettings, FiLogOut, FiSun, FiMoon, FiGlobe, FiEdit } = FiIcons;
 
 const UserMenu = ({ user }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,6 +15,7 @@ const UserMenu = ({ user }) => {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const { isDark, toggleTheme } = useTheme();
+  const { isEditMode, toggleEditMode } = useEditMode();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -48,6 +50,13 @@ const UserMenu = ({ user }) => {
       onClick: toggleTheme
     },
     {
+      icon: FiEdit,
+      label: 'Edit Mode',
+      onClick: toggleEditMode,
+      className: isEditMode ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : '',
+      indicator: isEditMode
+    },
+    {
       icon: FiGlobe,
       label: 'Public Collections',
       onClick: handlePublicCollectionsClick
@@ -67,17 +76,24 @@ const UserMenu = ({ user }) => {
 
   return (
     <div className="relative" ref={menuRef}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-      >
-        <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
-          <SafeIcon icon={FiUser} className="w-4 h-4 text-white" />
-        </div>
-        <span className="hidden md:block text-sm font-medium text-gray-700 dark:text-gray-300">
-          {user?.name || 'User'}
-        </span>
-      </button>
+      <div className="flex items-center">
+        {isEditMode && (
+          <div className="mr-3 px-2 py-1 text-xs font-medium bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 rounded">
+            Edit Mode
+          </div>
+        )}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+        >
+          <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
+            <SafeIcon icon={FiUser} className="w-4 h-4 text-white" />
+          </div>
+          <span className="hidden md:block text-sm font-medium text-gray-700 dark:text-gray-300">
+            {user?.name || 'User'}
+          </span>
+        </button>
+      </div>
 
       <AnimatePresence>
         {isOpen && (
@@ -106,7 +122,10 @@ const UserMenu = ({ user }) => {
                 className={`w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${item.className || ''}`}
               >
                 <SafeIcon icon={item.icon} className="w-4 h-4 mr-3" />
-                {item.label}
+                <span className="flex-1 text-left">{item.label}</span>
+                {item.indicator && (
+                  <div className="w-2 h-2 bg-primary-500 rounded-full" />
+                )}
               </button>
             ))}
           </motion.div>

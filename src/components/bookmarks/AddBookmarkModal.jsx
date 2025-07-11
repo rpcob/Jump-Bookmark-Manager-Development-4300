@@ -3,6 +3,7 @@ import { useData } from '../../contexts/DataContext';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
+import IconUpload from '../ui/IconUpload';
 import toast from 'react-hot-toast';
 
 const AddBookmarkModal = ({ isOpen, onClose, collectionId, spaceId }) => {
@@ -12,13 +13,29 @@ const AddBookmarkModal = ({ isOpen, onClose, collectionId, spaceId }) => {
     description: '',
     tags: '',
     notes: '',
+    customIcon: null,
   });
   const [loading, setLoading] = useState(false);
   const { createBookmark } = useData();
 
+  const fetchMetadata = async (url) => {
+    try {
+      const response = await fetch(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
+      const data = await response.json();
+      if (data.status === 'success') {
+        return {
+          title: data.data.title || '',
+          description: data.data.description || '',
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching metadata:', error);
+    }
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!formData.url.trim()) {
       toast.error('URL is required');
       return;
@@ -26,14 +43,22 @@ const AddBookmarkModal = ({ isOpen, onClose, collectionId, spaceId }) => {
 
     setLoading(true);
     try {
-      // Simulate fetching metadata
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      let metadata = null;
+      if (!formData.title.trim()) {
+        metadata = await fetchMetadata(formData.url);
+      }
+
+      // Use custom icon if provided, otherwise use auto-fetched favicon
+      const favicon = formData.customIcon || 
+        `https://www.google.com/s2/favicons?domain=${new URL(formData.url).hostname}&sz=32`;
+
       const bookmarkData = {
         ...formData,
-        title: formData.title || formData.url,
+        title: formData.title || (metadata?.title || formData.url),
+        description: formData.description || (metadata?.description || ''),
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-        favicon: `https://www.google.com/s2/favicons?domain=${new URL(formData.url).hostname}&sz=32`,
+        favicon,
+        hasCustomIcon: !!formData.customIcon,
       };
 
       await createBookmark(spaceId, collectionId, bookmarkData);
@@ -45,6 +70,7 @@ const AddBookmarkModal = ({ isOpen, onClose, collectionId, spaceId }) => {
         description: '',
         tags: '',
         notes: '',
+        customIcon: null,
       });
     } catch (error) {
       toast.error('Failed to add bookmark');
@@ -58,6 +84,20 @@ const AddBookmarkModal = ({ isOpen, onClose, collectionId, spaceId }) => {
     setFormData(prev => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleIconUpload = (iconDataUrl) => {
+    setFormData(prev => ({
+      ...prev,
+      customIcon: iconDataUrl,
+    }));
+  };
+
+  const handleIconRemove = () => {
+    setFormData(prev => ({
+      ...prev,
+      customIcon: null,
     }));
   };
 
@@ -96,6 +136,14 @@ const AddBookmarkModal = ({ isOpen, onClose, collectionId, spaceId }) => {
           value={formData.tags}
           onChange={handleChange}
           placeholder="tag1, tag2, tag3"
+        />
+
+        <IconUpload
+          label="Custom Icon"
+          value={formData.customIcon}
+          onUpload={handleIconUpload}
+          onRemove={handleIconRemove}
+          fallbackUrl={formData.url ? `https://www.google.com/s2/favicons?domain=${new URL(formData.url).hostname}&sz=32` : null}
         />
 
         <div>
